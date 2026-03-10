@@ -1,0 +1,28 @@
+.page {
+  height: 100%;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1rem;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.index {
+  color: #999;
+  font-size: 0.75rem;
+  min-width: 3rem;
+}
+
+.title {
+  flex: 1;
+  font-size: 0.875rem;
+}
+
+.height {
+  color: #666;
+  font-size: 0.75rem;
+}

@@ -1,0 +1,22 @@
+.container {
+  overflow: auto;
+  position: relative;
+}
+
+.phantom {
+  position: relative;
+}
+
+.content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.status {
+  padding: 0.75rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #999;
+}

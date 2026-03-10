@@ -1,0 +1,106 @@
+/* CSS Reset - 移除浏览器默认样式 */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  /* 基准字号：以 375px 设计稿为基准，1rem = 16px */
+  font-size: calc(100vw / 375 * 16);
+  line-height: 1.15;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 限制最大最小字号 */
+@media (min-width: 750px) {
+  html {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 320px) {
+  html {
+    font-size: 13.65px;
+  }
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #333;
+  background-color: #fff;
+}
+
+/* 移除列表默认样式 */
+ul,
+ol {
+  list-style: none;
+}
+
+/* 图片自适应 */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 表单元素重置 */
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+button {
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+button:focus {
+  outline: none;
+}
+
+button:focus-visible {
+  outline: 0.125rem solid #0066ff;
+  outline-offset: 0.125rem;
+}
+
+/* 链接重置 */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 表格重置 */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* 标题重置 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+}
