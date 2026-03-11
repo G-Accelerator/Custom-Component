@@ -39,7 +39,7 @@ export default function Carousel({
       timerRef.current = null;
     }
     if (autoPlay) {
-      timerRef.current = window.setInterval(() => {
+      timerRef.current = setInterval(() => {
         setCurrent((prev) => (prev + 1) % total);
       }, interval);
     }
