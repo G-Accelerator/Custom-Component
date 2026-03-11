@@ -6,6 +6,20 @@
 
 .info {
   padding: 1rem;
-  color: #666;
-  font-size: 0.875rem;
+}
+.info h3 {
+  margin: 0.5rem 0 0.2rem 0;
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.774);
+  font-weight: 600;
+}
+ul li:last-child {
+  position: absolute;
+  bottom: 6rem;
+  /* 水平居中 */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  color: rgba(2, 3, 3, 0.575);
 }
