@@ -54,7 +54,7 @@ export default function VirtualListPage() {
         loading={loading}
         renderItem={(item, index) => (
           <div className={styles.item} style={{ height: item.height }}>
-            <span className={styles.index}>#{index + 1}</span>
+            <span className={styles.index}>{index + 1}</span>
             <span className={styles.title}>{item.title}</span>
             <span className={styles.height}>{item.height}px</span>
           </div>

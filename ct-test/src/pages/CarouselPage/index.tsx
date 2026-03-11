@@ -2,11 +2,7 @@ import Carousel from "../../components/Carousel";
 import styles from "./index.module.css";
 
 export default function CarouselPage() {
-  const images = [
-    "https://picsum.photos/800/400?random=1",
-    "https://picsum.photos/800/400?random=2",
-    "https://picsum.photos/800/400?random=3",
-  ];
+  const images = ["/OIP-C.jpg", "/OIP-C (1).jpg", "/300px-地图-空间实验室.png"];
 
   return (
     <div className={styles.page}>
