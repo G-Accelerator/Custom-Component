@@ -33,59 +33,56 @@ export default function Carousel({
   const touchEndX = useRef(0);
   const timerRef = useRef<number | null>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  // 标记是否是无缝滚动的过渡阶段
+  const nextRef = useRef<() => void>(() => { });
+  const prevRef = useRef<() => void>(() => { });
   const isResettingRef = useRef(false);
-
   const resetTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
+    if (timerRef.current) clearInterval(timerRef.current);
     if (autoPlay && total > 1) {
       timerRef.current = setInterval(() => {
-        next();
+        nextRef.current();
       }, interval);
     }
   }, [autoPlay, interval, total]);
 
   const next = useCallback(() => {
-    if (total <= 1) return;
-    if (isResettingRef.current) return;
-
-    if (current === total - 1) {
-      // 最后一张切换到拼接的
-      setCurrent(total);
-      isResettingRef.current = true;
-    } else {
-      setCurrent(prev => prev + 1);
-    }
+    if (total <= 1 || isResettingRef.current) return;
+    setCurrent(prev => {
+      if (prev === total - 1) {
+        isResettingRef.current = true;
+        return total;
+      }
+      return prev + 1;
+    });
     resetTimer();
-  }, [current, total, resetTimer]);
+  }, [total, resetTimer]);
 
   const prev = useCallback(() => {
-    if (total <= 1) return;
-    if (isResettingRef.current) return;
-
-    if (current === 0) {
-      // 瞬间无动画切到拼接
-      isResettingRef.current = true;
-      setCurrent(total);
-      setTimeout(() => {
-        if (trackRef.current) {
-          trackRef.current.style.transition = "none";
-          trackRef.current.style.transform = `translateX(-${total * 100}%)`;
-          // 强制重绘
-          trackRef.current.offsetHeight;
-          trackRef.current.style.transition = "transform 0.6s ease";
-          setCurrent(total - 1);
-          isResettingRef.current = false;
-        }
-      }, 0);
-    } else {
-      setCurrent(prev => prev - 1);
-    }
+    if (total <= 1 || isResettingRef.current) return;
+    setCurrent(prevIndex => {
+      if (prevIndex === 0) {
+        isResettingRef.current = true;
+        setTimeout(() => {
+          if (trackRef.current) {
+            trackRef.current.style.transition = "none";
+            trackRef.current.style.transform = `translateX(-${total * 100}%)`;
+            trackRef.current.offsetHeight;
+            trackRef.current.style.transition = "transform 0.6s ease";
+            setCurrent(total - 1);
+            isResettingRef.current = false;
+          }
+        }, 0);
+        return total;
+      }
+      return prevIndex - 1;
+    });
     resetTimer();
-  }, [current, total, resetTimer]);
+  }, [total, resetTimer]); 
+
+  useEffect(() => {
+    nextRef.current = next;
+    prevRef.current = prev;
+  }, [next, prev]);
 
   const goTo = useCallback(
     (index: number) => {
@@ -129,7 +126,7 @@ export default function Carousel({
           setCurrent(0);
           isResettingRef.current = false;
         }
-      }, 600); 
+      }, 600);
 
       return () => clearTimeout(timer);
     }
@@ -157,6 +154,7 @@ export default function Carousel({
     ));
   };
 
+
   return (
     <div
       className={styles.carousel}
@@ -174,15 +172,15 @@ export default function Carousel({
 
       {showArrows && total > 1 && (
         <>
-          <button 
-            className={`${styles.arrow} ${styles.prev}`} 
+          <button
+            className={`${styles.arrow} ${styles.prev}`}
             onClick={prev}
             disabled={isResettingRef.current}
           >
             ‹
           </button>
-          <button 
-            className={`${styles.arrow} ${styles.next}`} 
+          <button
+            className={`${styles.arrow} ${styles.next}`}
             onClick={next}
             disabled={isResettingRef.current}
           >
