@@ -32,35 +32,68 @@ export default function Carousel({
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
   const timerRef = useRef<number | null>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  // 标记是否是无缝滚动的过渡阶段
+  const isResettingRef = useRef(false);
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-    if (autoPlay) {
+    if (autoPlay && total > 1) {
       timerRef.current = setInterval(() => {
-        setCurrent((prev) => (prev + 1) % total);
+        next();
       }, interval);
     }
   }, [autoPlay, interval, total]);
 
   const next = useCallback(() => {
-    setCurrent((prev) => (prev + 1) % total);
+    if (total <= 1) return;
+    if (isResettingRef.current) return;
+
+    if (current === total - 1) {
+      // 最后一张切换到拼接的
+      setCurrent(total);
+      isResettingRef.current = true;
+    } else {
+      setCurrent(prev => prev + 1);
+    }
     resetTimer();
-  }, [total, resetTimer]);
+  }, [current, total, resetTimer]);
 
   const prev = useCallback(() => {
-    setCurrent((prev) => (prev - 1 + total) % total);
+    if (total <= 1) return;
+    if (isResettingRef.current) return;
+
+    if (current === 0) {
+      // 瞬间无动画切到拼接
+      isResettingRef.current = true;
+      setCurrent(total);
+      setTimeout(() => {
+        if (trackRef.current) {
+          trackRef.current.style.transition = "none";
+          trackRef.current.style.transform = `translateX(-${total * 100}%)`;
+          // 强制重绘
+          trackRef.current.offsetHeight;
+          trackRef.current.style.transition = "transform 0.6s ease";
+          setCurrent(total - 1);
+          isResettingRef.current = false;
+        }
+      }, 0);
+    } else {
+      setCurrent(prev => prev - 1);
+    }
     resetTimer();
-  }, [total, resetTimer]);
+  }, [current, total, resetTimer]);
 
   const goTo = useCallback(
     (index: number) => {
+      if (total <= 1 || isResettingRef.current) return;
       setCurrent(index);
       resetTimer();
     },
-    [resetTimer],
+    [resetTimer, total],
   );
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -73,6 +106,7 @@ export default function Carousel({
   };
 
   const handleTouchEnd = () => {
+    if (total <= 1 || isResettingRef.current) return;
     const diff = touchStartX.current - touchEndX.current;
     const threshold = 50;
 
@@ -84,13 +118,44 @@ export default function Carousel({
   };
 
   useEffect(() => {
-    resetTimer();
+    if (total <= 1) return;
+    if (current === total && isResettingRef.current) {
+      const timer = setTimeout(() => {
+        if (trackRef.current) {
+          trackRef.current.style.transition = "none";
+          trackRef.current.style.transform = "translateX(0%)";
+          trackRef.current.offsetHeight;
+          trackRef.current.style.transition = "transform 0.6s ease";
+          setCurrent(0);
+          isResettingRef.current = false;
+        }
+      }, 600); 
+
+      return () => clearTimeout(timer);
+    }
+  }, [current, total]);
+
+  useEffect(() => {
+    if (total > 1) {
+      resetTimer();
+    }
     return () => {
       if (timerRef.current) {
         clearInterval(timerRef.current);
       }
     };
-  }, [resetTimer]);
+  }, [resetTimer, total]);
+
+  const renderSlides = () => {
+    if (total === 0) return null;
+    // 基础轮播项 + 最后拼接第一张
+    const slides = [...children, children[0]];
+    return slides.map((child, index) => (
+      <div key={index} className={styles.slide}>
+        {child}
+      </div>
+    ));
+  };
 
   return (
     <div
@@ -100,34 +165,40 @@ export default function Carousel({
       onTouchEnd={handleTouchEnd}
     >
       <div
+        ref={trackRef}
         className={styles.track}
         style={{ transform: `translateX(-${current * 100}%)` }}
       >
-        {children.map((child, index) => (
-          <div key={index} className={styles.slide}>
-            {child}
-          </div>
-        ))}
+        {renderSlides()}
       </div>
 
-      {showArrows && (
+      {showArrows && total > 1 && (
         <>
-          <button className={`${styles.arrow} ${styles.prev}`} onClick={prev}>
+          <button 
+            className={`${styles.arrow} ${styles.prev}`} 
+            onClick={prev}
+            disabled={isResettingRef.current}
+          >
             ‹
           </button>
-          <button className={`${styles.arrow} ${styles.next}`} onClick={next}>
+          <button 
+            className={`${styles.arrow} ${styles.next}`} 
+            onClick={next}
+            disabled={isResettingRef.current}
+          >
             ›
           </button>
         </>
       )}
 
-      {showDots && (
+      {showDots && total > 1 && (
         <div className={styles.dots}>
           {children.map((_, index) => (
             <button
               key={index}
-              className={`${styles.dot} ${index === current ? styles.active : ""}`}
+              className={`${styles.dot} ${index === current % total ? styles.active : ""}`}
               onClick={() => goTo(index)}
+              disabled={isResettingRef.current}
             />
           ))}
         </div>
